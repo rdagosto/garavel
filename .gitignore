@@ -1,0 +1,6 @@
+.env
+tests/.env
+.vscode
+tmp
+.DS_Store
+docker-compose.yml

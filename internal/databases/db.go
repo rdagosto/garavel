@@ -1,0 +1,42 @@
+package databases
+
+import (
+	"log"
+
+	"gorm.io/gorm"
+)
+
+type Database interface {
+	Connect() error
+	GetDB() *gorm.DB
+}
+
+var databases map[string]Database
+
+func init() {
+	databases = make(map[string]Database)
+}
+
+func connect(dbType string) Database {
+	var db Database
+	switch dbType {
+	case "mysql":
+		db = &MySQLDatabase{}
+	default:
+		log.Fatalf("❌ Unsupported database type: %s", dbType)
+	}
+
+	err := db.Connect()
+	if err != nil {
+		log.Fatalf("❌ Database connection failed: %v", err)
+	}
+
+	return db
+}
+
+func GetDB(dbType string) *gorm.DB {
+	if databases[dbType] == nil {
+		databases[dbType] = connect(dbType)
+	}
+	return databases[dbType].GetDB()
+}
