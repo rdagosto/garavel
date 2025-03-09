@@ -7,6 +7,10 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	"github.com/golang-migrate/migrate/v4"
+	mmysql "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 type MySQLDatabase struct {
@@ -29,6 +33,30 @@ func (m *MySQLDatabase) Connect() error {
 	}
 	m.dbInstance = db
 	return nil
+}
+
+func (m *MySQLDatabase) RunMigration() {
+	sqlDB, err := m.dbInstance.DB()
+	if err != nil {
+		log.Fatalf("Failed to get SQL DB from Gorm: %v", err)
+	}
+
+	driver, err := mmysql.WithInstance(sqlDB, &mmysql.Config{})
+	if err != nil {
+		log.Fatalf("Failed to create MySQL migration driver: %v", err)
+	}
+
+	mig, err := migrate.NewWithDatabaseInstance("file://internal/migrations", "mysql", driver)
+	if err != nil {
+		log.Fatalf("Migration initialization failed: %v", err)
+	}
+
+	err = mig.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		log.Fatalf("Migration failed: %v", err)
+	}
+
+	fmt.Println("Migration completed successfully!")
 }
 
 func (m *MySQLDatabase) GetDB() *gorm.DB {

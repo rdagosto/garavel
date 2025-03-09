@@ -9,6 +9,7 @@ import (
 type Database interface {
 	Connect() error
 	GetDB() *gorm.DB
+	RunMigration()
 }
 
 var databases map[string]Database
@@ -30,6 +31,8 @@ func connect(dbType string) Database {
 	if err != nil {
 		log.Fatalf("❌ Database connection failed: %v", err)
 	}
+
+	db.RunMigration()
 
 	return db
 }

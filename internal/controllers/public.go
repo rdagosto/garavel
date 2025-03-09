@@ -13,7 +13,7 @@ type Public struct {
 }
 
 func Health(c *gin.Context) {
-	Success(c, http.StatusOK, "running..")
+	Success(c, http.StatusOK, "running...")
 }
 
 func Login(c *gin.Context) {
