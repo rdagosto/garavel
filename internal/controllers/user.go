@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"garavel/internal/gates"
 	"garavel/internal/libs"
 	"garavel/internal/models"
 	"garavel/internal/validators"
@@ -31,6 +32,10 @@ func (ctr *User) Create(c *gin.Context) {
 }
 
 func (ctr *User) Show(c *gin.Context) {
+	if err := gates.Gate(c, "isMe", c.Param("id")); err != nil {
+		Error(c, http.StatusUnauthorized, err.Error())
+		return
+	}
 	var user models.User
 	if err := models.GetDB().First(&user, c.Param("id")).Error; err != nil {
 		Error(c, http.StatusNotFound, "Record not found!")
@@ -40,6 +45,10 @@ func (ctr *User) Show(c *gin.Context) {
 }
 
 func (ctr *User) Update(c *gin.Context) {
+	if err := gates.Gate(c, "isMe", c.Param("id")); err != nil {
+		Error(c, http.StatusUnauthorized, err.Error())
+		return
+	}
 	var user models.User
 	if err := models.GetDB().First(&user, c.Param("id")).Error; err != nil {
 		Error(c, http.StatusNotFound, "Record not found!")
@@ -62,6 +71,10 @@ func (ctr *User) Update(c *gin.Context) {
 }
 
 func (ctr *User) Destroy(c *gin.Context) {
+	if err := gates.Gate(c, "isMe", c.Param("id")); err != nil {
+		Error(c, http.StatusUnauthorized, err.Error())
+		return
+	}
 	var user models.User
 	if err := models.GetDB().First(&user, c.Param("id")).Error; err != nil {
 		Error(c, http.StatusNotFound, "Record not found!")

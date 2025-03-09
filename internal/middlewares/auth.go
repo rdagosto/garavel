@@ -3,6 +3,7 @@ package middlewares
 import (
 	"garavel/internal/controllers"
 	"garavel/internal/libs"
+	"garavel/internal/models"
 	"net/http"
 	"strings"
 
@@ -29,7 +30,13 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("userID", userID)
+		var user models.User
+		if err := models.GetDB().First(&user, userID).Error; err != nil {
+			controllers.Error(c, http.StatusNotFound, "User not found")
+			return
+		}
+
+		c.Set("user", user)
 		c.Next()
 	}
 }
