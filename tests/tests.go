@@ -29,7 +29,7 @@ func AddToken(req *http.Request) {
 
 func AssertDatabaseHas(t *testing.T, table string, condition interface{}) {
 	var count int64
-	err := models.GetDB(nil).Table(table).Where(condition).Count(&count).Error
+	err := models.GetDB().Table(table).Where(condition).Count(&count).Error
 	if err != nil {
 		t.Fatalf("Error checking database: %v", err)
 	}
@@ -38,7 +38,7 @@ func AssertDatabaseHas(t *testing.T, table string, condition interface{}) {
 
 func AssertDatabaseMissing(t *testing.T, table string, condition interface{}) {
 	var count int64
-	err := models.GetDB(nil).Table(table).Where(condition).Count(&count).Error
+	err := models.GetDB().Table(table).Where(condition).Count(&count).Error
 	if err != nil {
 		t.Fatalf("Error checking database: %v", err)
 	}

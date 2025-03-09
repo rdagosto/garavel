@@ -14,7 +14,7 @@ type Customer struct {
 
 func (ctr *Customer) Index(c *gin.Context) {
 	var customers []models.Customer
-	models.GetDB(models.Factory("customer")).Find(&customers)
+	models.GetDB().Find(&customers)
 	Success(c, http.StatusOK, views.List(customers, views.Customer{}))
 }
 
@@ -24,13 +24,13 @@ func (ctr *Customer) Create(c *gin.Context) {
 		Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	models.GetDB(models.Factory("customer")).Create(&customer)
+	models.GetDB().Create(&customer)
 	Success(c, http.StatusCreated, views.Item(customer, views.Customer{}))
 }
 
 func (ctr *Customer) Show(c *gin.Context) {
 	var customer models.Customer
-	if err := models.GetDB(models.Factory("customer")).First(&customer, c.Param("id")).Error; err != nil {
+	if err := models.GetDB().First(&customer, c.Param("id")).Error; err != nil {
 		Error(c, http.StatusNotFound, "Record not found!")
 		return
 	}
@@ -39,7 +39,7 @@ func (ctr *Customer) Show(c *gin.Context) {
 
 func (ctr *Customer) Update(c *gin.Context) {
 	var customer models.Customer
-	if err := models.GetDB(models.Factory("customer")).First(&customer, c.Param("id")).Error; err != nil {
+	if err := models.GetDB().First(&customer, c.Param("id")).Error; err != nil {
 		Error(c, http.StatusNotFound, "Record not found!")
 		return
 	}
@@ -50,7 +50,7 @@ func (ctr *Customer) Update(c *gin.Context) {
 		return
 	}
 
-	if err := models.GetDB(models.Factory("customer")).Save(&customer).Error; err != nil {
+	if err := models.GetDB().Save(&customer).Error; err != nil {
 		Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -60,10 +60,10 @@ func (ctr *Customer) Update(c *gin.Context) {
 
 func (ctr *Customer) Destroy(c *gin.Context) {
 	var customer models.Customer
-	if err := models.GetDB(models.Factory("customer")).First(&customer, c.Param("id")).Error; err != nil {
+	if err := models.GetDB().First(&customer, c.Param("id")).Error; err != nil {
 		Error(c, http.StatusNotFound, "Record not found!")
 		return
 	}
-	models.GetDB(models.Factory("customer")).Delete(&customer)
+	models.GetDB().Delete(&customer)
 	Success(c, http.StatusNoContent, nil)
 }

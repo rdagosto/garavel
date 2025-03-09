@@ -24,7 +24,7 @@ func Login(c *gin.Context) {
 	}
 
 	var dbUser models.User
-	if err := models.GetDB(models.Factory("user")).Where("email = ?", user.Email).First(&dbUser).Error; err != nil {
+	if err := models.GetDB().Where("email = ?", user.Email).First(&dbUser).Error; err != nil {
 		Error(c, http.StatusUnauthorized, "Invalid email or password")
 		return
 	}

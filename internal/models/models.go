@@ -24,9 +24,9 @@ func Factory(model string) Model {
 	}
 }
 
-func GetDB(model Model) *gorm.DB {
-	if model == nil {
+func GetDB(model ...Model) *gorm.DB {
+	if len(model) == 0 || model[0] == nil {
 		return databases.GetDB(configs.Config("database.default", ""))
 	}
-	return databases.GetDB(model.GetDrive())
+	return databases.GetDB(model[0].GetDrive())
 }
