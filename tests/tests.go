@@ -23,7 +23,7 @@ func GetRouter() *gin.Engine {
 }
 
 func AddToken(req *http.Request) {
-	jwtToken, _ := libs.GenerateJWT(123)
+	jwtToken, _ := libs.GenerateJWT(1)
 	req.Header.Set("Authorization", "Bearer "+jwtToken)
 }
 

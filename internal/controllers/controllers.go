@@ -6,6 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	UserClass     = "users"
+	CustomerClass = "customers"
+)
+
 type Controller interface {
 	Index(c *gin.Context)
 	Create(c *gin.Context)
@@ -14,14 +19,14 @@ type Controller interface {
 	Destroy(c *gin.Context)
 }
 
-func Factory(ctr string) Controller {
-	switch ctr {
-	case "customers":
+func Make(class string) Controller {
+	switch class {
+	case CustomerClass:
 		return &Customer{}
-	case "users":
+	case UserClass:
 		return &User{}
 	default:
-		log.Fatalf("❌ Unsupported controller type: %s", ctr)
+		log.Fatalf("❌ Unsupported controller type: %s", class)
 		return nil
 	}
 }

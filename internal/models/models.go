@@ -8,18 +8,23 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	UserClass     = "user"
+	CustomerClass = "customer"
+)
+
 type Model interface {
 	GetDrive() string
 }
 
-func Factory(model string) Model {
-	switch model {
-	case "customer":
-		return &Customer{}
-	case "user":
+func Make(class string) Model {
+	switch class {
+	case UserClass:
 		return &User{}
+	case CustomerClass:
+		return &Customer{}
 	default:
-		log.Fatalf("❌ Unsupported model type: %s", model)
+		log.Fatalf("❌ Unsupported model type: %s", class)
 		return nil
 	}
 }

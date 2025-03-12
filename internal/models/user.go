@@ -1,6 +1,7 @@
 package models
 
 import (
+	"garavel/internal/databases"
 	"time"
 )
 
@@ -13,5 +14,5 @@ type User struct {
 }
 
 func (model *User) GetDrive() string {
-	return "mysql"
+	return databases.MysqlDB
 }

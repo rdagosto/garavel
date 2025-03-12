@@ -1,9 +1,14 @@
 package databases
 
 import (
+	"garavel/internal/configs"
 	"log"
 
 	"gorm.io/gorm"
+)
+
+const (
+	MysqlDB = "mysql"
 )
 
 type Database interface {
@@ -21,7 +26,7 @@ func init() {
 func connect(dbType string) Database {
 	var db Database
 	switch dbType {
-	case "mysql":
+	case MysqlDB:
 		db = &MySQLDatabase{}
 	default:
 		log.Fatalf("❌ Unsupported database type: %s", dbType)
@@ -32,7 +37,9 @@ func connect(dbType string) Database {
 		log.Fatalf("❌ Database connection failed: %v", err)
 	}
 
-	db.RunMigration()
+	if configs.EnvInt("IS_TEST", "0") == 0 {
+		db.RunMigration()
+	}
 
 	return db
 }

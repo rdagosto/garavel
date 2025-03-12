@@ -14,12 +14,12 @@ func HandleRequest() {
 	R.Use(gin.Recovery())
 	R.GET("/health", controllers.Health)
 	R.POST("/login", controllers.Login)
-	crud("users", true)
-	crud("customers", true)
+	crud(controllers.UserClass, true)
+	crud(controllers.CustomerClass, true)
 }
 
 func crud(collect string, isProtected bool) {
-	crl := controllers.Factory(collect)
+	crl := controllers.Make(collect)
 	group := R.Group("/" + collect)
 	if isProtected {
 		group.Use(middlewares.Auth())

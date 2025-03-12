@@ -32,7 +32,7 @@ func (ctr *User) Create(c *gin.Context) {
 }
 
 func (ctr *User) Show(c *gin.Context) {
-	if err := gates.Gate(c, "isMe", c.Param("id")); err != nil {
+	if err := gates.Gate(c, gates.IsMeGate, c.Param("id")); err != nil {
 		Error(c, http.StatusUnauthorized, err.Error())
 		return
 	}
@@ -45,7 +45,7 @@ func (ctr *User) Show(c *gin.Context) {
 }
 
 func (ctr *User) Update(c *gin.Context) {
-	if err := gates.Gate(c, "isMe", c.Param("id")); err != nil {
+	if err := gates.Gate(c, gates.IsMeGate, c.Param("id")); err != nil {
 		Error(c, http.StatusUnauthorized, err.Error())
 		return
 	}
@@ -71,7 +71,7 @@ func (ctr *User) Update(c *gin.Context) {
 }
 
 func (ctr *User) Destroy(c *gin.Context) {
-	if err := gates.Gate(c, "isMe", c.Param("id")); err != nil {
+	if err := gates.Gate(c, gates.IsMeGate, c.Param("id")); err != nil {
 		Error(c, http.StatusUnauthorized, err.Error())
 		return
 	}
