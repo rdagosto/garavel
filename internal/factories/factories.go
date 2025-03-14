@@ -6,23 +6,25 @@ import (
 )
 
 func Make[M any](class string, attrs map[string]any) M {
-	var result any
+	var entity any
 	switch class {
 	case models.UserClass:
-		result = User{}.Make()
+		entity = User{}.Make()
 	case models.CustomerClass:
-		result = Customer{}.Make()
+		entity = Customer{}.Make()
 	}
-	applyOverrides(&result, attrs)
-	return result.(M)
+	entity = merge(entity, attrs)
+	return entity.(M)
 }
 
-func applyOverrides(obj any, attrs map[string]any) {
-	v := reflect.ValueOf(obj).Elem()
+func merge[T any](instance T, attrs map[string]interface{}) T {
+	structValue := reflect.ValueOf(&instance).Elem()
+
 	for key, value := range attrs {
-		field := v.FieldByName(key)
+		field := structValue.FieldByName(key)
 		if field.IsValid() && field.CanSet() {
 			field.Set(reflect.ValueOf(value))
 		}
 	}
+	return instance
 }
