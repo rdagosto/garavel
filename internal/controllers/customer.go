@@ -1,7 +1,8 @@
 package controllers
 
 import (
-	"garavel/internal/repositories"
+	"garavel/internal/models"
+	"garavel/internal/services"
 	"garavel/internal/validators"
 	"garavel/internal/views"
 	"net/http"
@@ -13,61 +14,58 @@ type Customer struct {
 }
 
 func (ctr *Customer) Index(c *gin.Context) {
-	list := repositories.Customer{}.GetList()
-	repositories.Find(list)
+	list := services.List[models.Customer]()
 	Success(c, http.StatusOK, views.List(list, views.Customer{}))
 }
 
 func (ctr *Customer) Create(c *gin.Context) {
-	customer, err := validators.Validate(c, validators.CustomerStore{}, repositories.Customer{}.GetModel())
+	request, err := validators.Validate(c, validators.CustomerStore{})
 	if err != nil {
 		Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	repositories.Create(&customer)
-	Success(c, http.StatusCreated, views.Item(customer, views.Customer{}))
+
+	model, err := services.Create[models.Customer](request)
+	if err != nil {
+		Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	Success(c, http.StatusCreated, views.Item(model, views.Customer{}))
 }
 
 func (ctr *Customer) Show(c *gin.Context) {
-	customer := repositories.Customer{}.GetModel()
-	err := repositories.GetByID(&customer, c.Param("id"))
+	model, err := services.Show[models.Customer](c.Param("id"))
 	if err != nil {
-		Error(c, http.StatusNotFound, "Record not found!")
+		Error(c, http.StatusNotFound, err.Error())
 		return
 	}
-	Success(c, http.StatusOK, views.Item(customer, views.Customer{}))
+
+	Success(c, http.StatusOK, views.Item(model, views.Customer{}))
 }
 
 func (ctr *Customer) Update(c *gin.Context) {
-	customer := repositories.Customer{}.GetModel()
-	err := repositories.GetByID(&customer, c.Param("id"))
-	if err != nil {
-		Error(c, http.StatusNotFound, "Record not found!")
-		return
-	}
-
-	_, err = validators.Validate(c, validators.CustomerUpdate{}, &customer)
+	request, err := validators.Validate(c, validators.CustomerUpdate{})
 	if err != nil {
 		Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = repositories.Save(&customer)
+	model, err := services.Update[models.Customer](c.Param("id"), request)
 	if err != nil {
-		Error(c, http.StatusInternalServerError, err.Error())
+		Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	Success(c, http.StatusOK, views.Item(customer, views.Customer{}))
+	Success(c, http.StatusOK, views.Item(model, views.Customer{}))
 }
 
 func (ctr *Customer) Destroy(c *gin.Context) {
-	customer := repositories.Customer{}.GetModel()
-	err := repositories.GetByID(&customer, c.Param("id"))
+	err := services.Delete[models.Customer](c.Param("id"))
 	if err != nil {
 		Error(c, http.StatusNotFound, "Record not found!")
 		return
 	}
-	repositories.Delete(&customer)
+
 	Success(c, http.StatusNoContent, nil)
 }

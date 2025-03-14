@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"garavel/internal/gates"
-	"garavel/internal/libs"
-	"garavel/internal/repositories"
+	"garavel/internal/models"
+	"garavel/internal/services"
 	"garavel/internal/validators"
 	"garavel/internal/views"
 	"net/http"
@@ -15,23 +15,24 @@ type User struct {
 }
 
 func (ctr *User) Index(c *gin.Context) {
-	list := repositories.User{}.GetList()
-	repositories.Find(list)
-
+	list := services.List[models.User]()
 	Success(c, http.StatusOK, views.List(list, views.User{}))
 }
 
 func (ctr *User) Create(c *gin.Context) {
-	user, err := validators.Validate(c, validators.UserStore{}, repositories.User{}.GetModel())
+	request, err := validators.Validate(c, validators.UserStore{})
 	if err != nil {
 		Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	user.Password, _ = libs.Hash(user.Password)
-	repositories.Create(&user)
+	model, err := services.User{}.Create(request)
+	if err != nil {
+		Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
-	Success(c, http.StatusCreated, views.Item(user, views.User{}))
+	Success(c, http.StatusCreated, views.Item(model, views.User{}))
 }
 
 func (ctr *User) Show(c *gin.Context) {
@@ -40,14 +41,13 @@ func (ctr *User) Show(c *gin.Context) {
 		return
 	}
 
-	user := repositories.User{}.GetModel()
-	err := repositories.GetByID(&user, c.Param("id"))
+	model, err := services.Show[models.User](c.Param("id"))
 	if err != nil {
-		Error(c, http.StatusNotFound, "Record not found!")
+		Error(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	Success(c, http.StatusOK, views.Item(user, views.User{}))
+	Success(c, http.StatusOK, views.Item(model, views.User{}))
 }
 
 func (ctr *User) Update(c *gin.Context) {
@@ -56,27 +56,19 @@ func (ctr *User) Update(c *gin.Context) {
 		return
 	}
 
-	user := repositories.User{}.GetModel()
-	err := repositories.GetByID(&user, c.Param("id"))
-	if err != nil {
-		Error(c, http.StatusNotFound, "Record not found!")
-		return
-	}
-
-	user.Password, _ = libs.Hash(user.Password)
-	_, err = validators.Validate(c, validators.UserUpdate{}, &user)
+	request, err := validators.Validate(c, validators.UserUpdate{})
 	if err != nil {
 		Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = repositories.Save(&user)
+	model, err := services.User{}.Update(c.Param("id"), request)
 	if err != nil {
-		Error(c, http.StatusInternalServerError, err.Error())
+		Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	Success(c, http.StatusOK, views.Item(user, views.User{}))
+	Success(c, http.StatusOK, views.Item(model, views.User{}))
 }
 
 func (ctr *User) Destroy(c *gin.Context) {
@@ -85,14 +77,11 @@ func (ctr *User) Destroy(c *gin.Context) {
 		return
 	}
 
-	user := repositories.User{}.GetModel()
-	err := repositories.GetByID(&user, c.Param("id"))
+	err := services.Delete[models.User](c.Param("id"))
 	if err != nil {
 		Error(c, http.StatusNotFound, "Record not found!")
 		return
 	}
-
-	repositories.Delete(&user)
 
 	Success(c, http.StatusNoContent, nil)
 }
