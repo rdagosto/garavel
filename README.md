@@ -82,13 +82,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by Laravel, a powerful PHP framework.
 - Also influenced by Go frameworks like Gin and Echo.
 
-## TODO
-
-- Auth
-- Base tests (transaction)
-- Command
-- Collections
-
 ---
 
 Stay tuned for updates as Garavel evolves into a powerful yet lightweight Go framework!
