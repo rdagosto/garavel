@@ -35,6 +35,13 @@ func (m *MySQLDatabase) Connect() error {
 	return nil
 }
 
+func getMigrationPath() string {
+	if configs.EnvInt("IS_TEST", "0") == 1 {
+		return "file://../internal/migrations"
+	}
+	return "file://internal/migrations"
+}
+
 func (m *MySQLDatabase) RunMigration() {
 	sqlDB, err := m.dbInstance.DB()
 	if err != nil {
@@ -46,7 +53,7 @@ func (m *MySQLDatabase) RunMigration() {
 		log.Fatalf("Failed to create MySQL migration driver: %v", err)
 	}
 
-	mig, err := migrate.NewWithDatabaseInstance("file://internal/migrations", "mysql", driver)
+	mig, err := migrate.NewWithDatabaseInstance(getMigrationPath(), "mysql", driver)
 	if err != nil {
 		log.Fatalf("Migration initialization failed: %v", err)
 	}

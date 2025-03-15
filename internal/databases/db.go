@@ -1,7 +1,6 @@
 package databases
 
 import (
-	"garavel/internal/configs"
 	"log"
 
 	"gorm.io/gorm"
@@ -37,9 +36,7 @@ func connect(dbType string) Database {
 		log.Fatalf("❌ Database connection failed: %v", err)
 	}
 
-	if configs.EnvInt("IS_TEST", "0") == 0 {
-		db.RunMigration()
-	}
+	db.RunMigration()
 
 	return db
 }
