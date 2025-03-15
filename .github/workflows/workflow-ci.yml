@@ -48,10 +48,6 @@ jobs:
             sleep 2
           done
 
-      - name: Run migrations
-        run: |
-          mysql -h127.0.0.1 -utest_user -ptest_password test_garavel < schema.sql
-
       - name: Run tests
         env:
           APP_PORT: 80
