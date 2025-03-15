@@ -1,0 +1,66 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_garavel
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+
+      - name: Install MySQL client
+        run: sudo apt-get install -y mysql-client
+
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h127.0.0.1 -uroot -proot --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+      - name: Run migrations
+        run: |
+          mysql -h127.0.0.1 -utest_user -ptest_password test_garavel < schema.sql
+
+      - name: Run tests
+        env:
+          APP_PORT: 80
+          IS_TEST: 1
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: test_user
+          DB_PASSWORD: test_password
+          DB_DATABASE: test_garavel
+          JWT_KEY: a-string-secret-at-least-256-bits-long
+          JWT_TTL: 1
+        run: go test -v ./...
